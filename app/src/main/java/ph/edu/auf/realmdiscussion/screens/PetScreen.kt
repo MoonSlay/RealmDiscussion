@@ -1,5 +1,6 @@
 package ph.edu.auf.realmdiscussion.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +37,7 @@ import ph.edu.auf.realmdiscussion.viewmodels.PetViewModel
 import androidx.compose.material3.Icon
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -43,9 +45,21 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.res.painterResource
+import ph.edu.auf.realmdiscussion.R
 import ph.edu.auf.realmdiscussion.database.realmodel.OwnerModel
+import ph.edu.auf.realmdiscussion.database.realmodel.PetModel
 import ph.edu.auf.realmdiscussion.viewmodels.OwnerViewModel
 
+// Define a data class for PetType
+data class PetType(val name: String, val imageRes: Int)
+
+// Define a list of pet types with corresponding images
+val petTypes = listOf(
+    PetType("Dog", R.drawable.dog),
+    PetType("Cat", R.drawable.cat),
+    PetType("Bird", R.drawable.bird)
+)
 
 @Composable
 fun PetScreen(
@@ -59,6 +73,7 @@ fun PetScreen(
     var searchQuery by remember { mutableStateOf("") }
     var snackbarShown by remember { mutableStateOf(false) }
     var showAddPetDialog by remember { mutableStateOf(false) }
+    var showEditPetDialog by remember { mutableStateOf<PetModel?>(null) }
 
     LaunchedEffect(petViewModel.showSnackbar) {
         petViewModel.showSnackbar.collect { message ->
@@ -85,11 +100,27 @@ fun PetScreen(
             onDismiss = { showAddPetDialog = false },
             onAddPet = { name, type, age, ownerId ->
                 petViewModel.addPet(name, type, age, ownerId)
+                showAddPetDialog = false
             },
             owners = owners,
             onAddOwner = { ownerName ->
                 ownerViewModel.addOwner(ownerName)
             }
+        )
+    }
+
+    if (showEditPetDialog != null) {
+        AddPetDialog(
+            onDismiss = { showEditPetDialog = null },
+            onAddPet = { name, type, age, ownerId ->
+                petViewModel.updatePet(showEditPetDialog!!.id, name, type, age, ownerId)
+                showEditPetDialog = null
+            },
+            owners = owners,
+            onAddOwner = { ownerName ->
+                ownerViewModel.addOwner(ownerName)
+            },
+            initialPet = showEditPetDialog
         )
     }
 
@@ -113,7 +144,12 @@ fun PetScreen(
                         items = filteredPets,
                         key = { _, item -> item.id }
                     ) { _, petContent ->
-                        ItemPet(petContent, onRemove = petViewModel::deletePet)
+                        ItemPet(
+                            petModel = petContent,
+                            owners = owners, // Pass the owners list here
+                            onRemove = petViewModel::deletePet,
+                            onEdit = { showEditPetDialog = it }
+                        )
                     }
                 }
             }
@@ -135,12 +171,15 @@ fun AddPetDialog(
     onDismiss: () -> Unit,
     onAddPet: (String, String, Int, String?) -> Unit,
     owners: List<OwnerModel>,
-    onAddOwner: (String) -> Unit
+    onAddOwner: (String) -> Unit,
+    initialPet: PetModel? = null
 ) {
-    var name by remember { mutableStateOf("") }
-    var type by remember { mutableStateOf("") }
-    var age by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
+    var name by remember { mutableStateOf(initialPet?.name ?: "") }
+    var type by remember { mutableStateOf(initialPet?.petType ?: "") }
+    var age by remember { mutableStateOf(initialPet?.age?.toString() ?: "") }
+    var petTypeExpanded by remember { mutableStateOf(false) }
+    var hasOwner by remember { mutableStateOf(false) }
+    var ownerExpanded by remember { mutableStateOf(false) }
     var selectedOwner by remember { mutableStateOf<OwnerModel?>(null) }
     var newOwnerName by remember { mutableStateOf("") }
     var showAddOwnerDialog by remember { mutableStateOf(false) }
@@ -180,7 +219,7 @@ fun AddPetDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "Add New Pet") },
+        title = { Text(text = if (initialPet == null) "Add New Pet" else "Edit Pet") },
         text = {
             Column {
                 TextField(
@@ -188,50 +227,85 @@ fun AddPetDialog(
                     onValueChange = { name = it },
                     label = { Text("Pet Name") }
                 )
-                TextField(
-                    value = type,
-                    onValueChange = { type = it },
-                    label = { Text("Pet Type") }
-                )
-                TextField(
-                    value = age,
-                    onValueChange = { age = it },
-                    label = { Text("Pet Age") }
-                )
                 ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
+                    expanded = petTypeExpanded,
+                    onExpandedChange = { petTypeExpanded = !petTypeExpanded }
                 ) {
                     OutlinedTextField(
-                        value = selectedOwner?.name ?: "",
+                        value = type,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Owner") },
+                        label = { Text("Pet Type") },
                         trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = petTypeExpanded)
                         },
                         modifier = Modifier
                             .menuAnchor()
                             .fillMaxWidth()
                     )
                     ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        expanded = petTypeExpanded,
+                        onDismissRequest = { petTypeExpanded = false }
                     ) {
-                        owners.forEach { owner ->
+                        petTypes.forEach { petType ->
                             DropdownMenuItem(
                                 onClick = {
-                                    selectedOwner = owner
-                                    expanded = false
+                                    type = petType.name
+                                    petTypeExpanded = false
                                 },
-                                text = { Text(owner.name) }
+                                text = { Text(petType.name) }
                             )
                         }
                     }
                 }
-                Button(onClick = { showAddOwnerDialog = true }) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add Owner")
-                    Text("Add New Owner")
+                TextField(
+                    value = age,
+                    onValueChange = { age = it },
+                    label = { Text("Pet Age") }
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = hasOwner,
+                        onCheckedChange = { hasOwner = it }
+                    )
+                    Text(text = "Has Owner")
+                }
+                if (hasOwner) {
+                    ExposedDropdownMenuBox(
+                        expanded = ownerExpanded,
+                        onExpandedChange = { ownerExpanded = !ownerExpanded }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedOwner?.name ?: "",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Owner") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = ownerExpanded)
+                            },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = ownerExpanded,
+                            onDismissRequest = { ownerExpanded = false }
+                        ) {
+                            owners.forEach { owner ->
+                                DropdownMenuItem(
+                                    onClick = {
+                                        selectedOwner = owner
+                                        ownerExpanded = false
+                                    },
+                                    text = { Text(owner.name) }
+                                )
+                            }
+                        }
+                    }
+                    Button(onClick = { showAddOwnerDialog = true }) {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Owner")
+                        Text("Add New Owner")
+                    }
                 }
             }
         },
@@ -239,11 +313,11 @@ fun AddPetDialog(
             Button(
                 onClick = {
                     val petAge = age.toIntOrNull() ?: 0
-                    onAddPet(name, type, petAge, selectedOwner?.id)
+                    onAddPet(name, type, petAge, if (hasOwner) selectedOwner?.id else null)
                     onDismiss()
                 }
             ) {
-                Text("Add")
+                Text(if (initialPet == null) "Add" else "Save")
             }
         },
         dismissButton = {

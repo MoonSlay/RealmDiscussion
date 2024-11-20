@@ -74,4 +74,28 @@ class PetViewModel : ViewModel() {
             _showSnackbar.emit("Added $name")
         }
     }
+
+    fun updatePet(id: String, name: String, petType: String, age: Int, ownerId: String?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val realm = RealmHelper.getRealmInstance()
+            realm.write {
+                val pet = this.query<PetModel>("id == $0", id).first().find()
+                pet?.apply {
+                    this.name = name
+                    this.petType = petType
+                    this.age = age
+                }
+                val unmanagedPet = realm.copyFromRealm(pet!!)
+                _pets.update { pets ->
+                    pets.map { if (it.id == id) unmanagedPet else it }
+                }
+
+                ownerId?.let {
+                    val owner = this.query<OwnerModel>("id == $0", it).first().find()
+                    owner?.pets?.add(pet)
+                }
+            }
+            _showSnackbar.emit("Updated $name")
+        }
+    }
 }

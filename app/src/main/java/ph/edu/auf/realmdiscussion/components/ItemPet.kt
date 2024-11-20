@@ -1,10 +1,13 @@
 package ph.edu.auf.realmdiscussion.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -18,65 +21,93 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import ph.edu.auf.realmdiscussion.database.realmodel.OwnerModel
 import ph.edu.auf.realmdiscussion.database.realmodel.PetModel
+import ph.edu.auf.realmdiscussion.screens.petTypes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemPet(petModel: PetModel, onRemove: (PetModel) -> Unit){
-
+fun ItemPet(
+    petModel: PetModel,
+    owners: List<OwnerModel>,
+    onRemove: (PetModel) -> Unit,
+    onEdit: (PetModel) -> Unit
+) {
     val currentItem by rememberUpdatedState(petModel)
 
-    var dismissState = rememberSwipeToDismissBoxState(
+    val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
-            when(it){
+            when (it) {
                 SwipeToDismissBoxValue.StartToEnd -> {
-                    //DELETION PART
                     onRemove(currentItem)
                 }
                 SwipeToDismissBoxValue.EndToStart -> {
-                    //OTHER FUNCTION
+                    onEdit(currentItem)
                     return@rememberSwipeToDismissBoxState false
                 }
                 SwipeToDismissBoxValue.Settled -> {
-                    //NOTHING
                     return@rememberSwipeToDismissBoxState false
                 }
             }
             return@rememberSwipeToDismissBoxState true
         },
-        //25% of the width of the card/box
-        positionalThreshold = {it * .25f}
+        positionalThreshold = { it * .25f }
     )
+
+    val owner = owners.find { owner -> owner.pets.any { it.id == petModel.id } }
 
     SwipeToDismissBox(
         state = dismissState,
-        backgroundContent = { DismissBackground(dismissState)},
+        backgroundContent = { DismissBackground(dismissState) },
         content = {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(0.dp, 8.dp),
-                elevation =  CardDefaults.cardElevation(
-                    defaultElevation = 5.dp
-                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
                 shape = RoundedCornerShape(5.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = petModel.name,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "${petModel.age} years old",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = petModel.petType,
-                        style = MaterialTheme.typography.labelSmall
-                    )
+                Row(modifier = Modifier.padding(16.dp)) {
+                    val petType = petTypes.find { it.name == petModel.petType }
+                    petType?.let {
+                        Image(
+                            painter = painterResource(id = it.imageRes),
+                            contentDescription = it.name,
+                            modifier = Modifier
+                                .height(100.dp)
+                                .padding(start = 16.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(15.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = petModel.name,
+                            style = MaterialTheme.typography.headlineSmall,
+                            maxLines = 1
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "${petModel.age} years old",
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = petModel.petType,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        owner?.let {
+                            Text(
+                                text = "Owner: ${it.name}",
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1
+                            )
+                        }
+                    }
                 }
             }
         }
