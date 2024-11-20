@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import ph.edu.auf.realmdiscussion.navigation.AppNavRoutes
+import ph.edu.auf.realmdiscussion.ui.theme.barrioFontFamily
 
 @Composable
 fun HomeScreen(navController: NavController){
@@ -24,10 +25,11 @@ fun HomeScreen(navController: NavController){
         modifier = Modifier.fillMaxSize())
     {
         Text(
-           text = "Pet Realm Sampler",
+           text = "Pet Realm \n Sampler",
             style = TextStyle(
+                fontFamily = barrioFontFamily ,
                 fontWeight = FontWeight.Bold,
-                fontSize = 24.sp
+                fontSize = 75.sp
             )
         )
         Spacer(modifier = Modifier.height(20.dp))
