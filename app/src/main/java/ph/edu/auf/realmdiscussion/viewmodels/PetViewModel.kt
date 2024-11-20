@@ -90,9 +90,14 @@ class PetViewModel : ViewModel() {
                     pets.map { if (it.id == id) unmanagedPet else it }
                 }
 
+                // Remove pet from previous owner's list
+                val previousOwner = this.query<OwnerModel>("pets.id == $0", id).first().find()
+                previousOwner?.pets?.remove(pet)
+
+                // Add pet to new owner's list
                 ownerId?.let {
-                    val owner = this.query<OwnerModel>("id == $0", it).first().find()
-                    owner?.pets?.add(pet)
+                    val newOwner = this.query<OwnerModel>("id == $0", it).first().find()
+                    newOwner?.pets?.add(pet)
                 }
             }
             _showSnackbar.emit("Updated $name")

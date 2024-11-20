@@ -2,6 +2,7 @@ package ph.edu.auf.realmdiscussion.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.realm.kotlin.ext.query
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +36,33 @@ class OwnerViewModel : ViewModel() {
                 })
                 val unmanagedOwner = realm.copyFromRealm(newOwner)
                 _owners.update { it + unmanagedOwner }
+            }
+        }
+    }
+
+    fun updateOwner(id: String, newName: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val realm = RealmHelper.getRealmInstance()
+            realm.write {
+                val owner = this.query<OwnerModel>("id == $0", id).first().find()
+                owner?.name = newName
+                val unmanagedOwner = realm.copyFromRealm(owner!!)
+                _owners.update { owners ->
+                    owners.map { if (it.id == id) unmanagedOwner else it }
+                }
+            }
+        }
+    }
+
+    fun deleteOwner(id: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val realm = RealmHelper.getRealmInstance()
+            realm.write {
+                val owner = this.query<OwnerModel>("id == $0", id).first().find()
+                owner?.let {
+                    delete(it)
+                    _owners.update { owners -> owners.filter { it.id != id } }
+                }
             }
         }
     }

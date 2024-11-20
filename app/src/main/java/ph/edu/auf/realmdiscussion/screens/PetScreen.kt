@@ -37,6 +37,7 @@ import ph.edu.auf.realmdiscussion.viewmodels.PetViewModel
 import androidx.compose.material3.Icon
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -178,9 +179,9 @@ fun AddPetDialog(
     var type by remember { mutableStateOf(initialPet?.petType ?: "") }
     var age by remember { mutableStateOf(initialPet?.age?.toString() ?: "") }
     var petTypeExpanded by remember { mutableStateOf(false) }
-    var hasOwner by remember { mutableStateOf(false) }
+    var hasOwner by remember { mutableStateOf(initialPet?.let { owners.any { owner -> owner.pets.any { it.id == initialPet.id } } } ?: false) }
     var ownerExpanded by remember { mutableStateOf(false) }
-    var selectedOwner by remember { mutableStateOf<OwnerModel?>(null) }
+    var selectedOwner by remember { mutableStateOf<OwnerModel?>(initialPet?.let { owners.find { owner -> owner.pets.any { it.id == initialPet.id } } }) }
     var newOwnerName by remember { mutableStateOf("") }
     var showAddOwnerDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -227,6 +228,9 @@ fun AddPetDialog(
                     onValueChange = { name = it },
                     label = { Text("Pet Name") }
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 ExposedDropdownMenuBox(
                     expanded = petTypeExpanded,
                     onExpandedChange = { petTypeExpanded = !petTypeExpanded }
@@ -258,6 +262,7 @@ fun AddPetDialog(
                         }
                     }
                 }
+                Spacer(modifier = Modifier.height(16.dp))
                 TextField(
                     value = age,
                     onValueChange = { age = it },
@@ -268,7 +273,7 @@ fun AddPetDialog(
                         checked = hasOwner,
                         onCheckedChange = { hasOwner = it }
                     )
-                    Text(text = "Has Owner")
+                    Text(text = "Assign Pet Owner")
                 }
                 if (hasOwner) {
                     ExposedDropdownMenuBox(
