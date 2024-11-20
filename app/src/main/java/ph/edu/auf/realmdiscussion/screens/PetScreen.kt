@@ -77,7 +77,7 @@ fun PetScreen(
     ownerViewModel: OwnerViewModel = viewModel()
 ) {
     val pets by petViewModel.pets.collectAsState()
-    val owners by ownerViewModel.owners.collectAsState()
+    val owners by ownerViewModel.owners.collectAsState() // Observe owners state
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
@@ -108,8 +108,8 @@ fun PetScreen(
     if (showAddPetDialog) {
         AddPetDialog(
             onDismiss = { showAddPetDialog = false },
-            onAddPet = { name, type, age, ownerId ->
-                petViewModel.addPet(name, type, age, ownerId)
+            onAddPet = { pet, ownerId ->
+                petViewModel.addPet(pet, ownerId)
                 showAddPetDialog = false
             },
             owners = owners,
@@ -122,8 +122,8 @@ fun PetScreen(
     if (showEditPetDialog != null) {
         AddPetDialog(
             onDismiss = { showEditPetDialog = null },
-            onAddPet = { name, type, age, ownerId ->
-                petViewModel.updatePet(showEditPetDialog!!.id, name, type, age, ownerId)
+            onAddPet = { pet, ownerId ->
+                petViewModel.updatePet(pet, ownerId)
                 showEditPetDialog = null
             },
             owners = owners,
@@ -186,7 +186,7 @@ fun PetScreen(
 @Composable
 fun AddPetDialog(
     onDismiss: () -> Unit,
-    onAddPet: (String, String, Int, String?) -> Unit,
+    onAddPet: (PetModel, String?) -> Unit,
     owners: List<OwnerModel>,
     onAddOwner: (String) -> Unit,
     initialPet: PetModel? = null
@@ -334,7 +334,13 @@ fun AddPetDialog(
             Button(
                 onClick = {
                     val petAge = age.toIntOrNull() ?: 0
-                    onAddPet(name, type, petAge, if (hasOwner) selectedOwner?.id else null)
+                    val pet = PetModel().apply {
+                        this.name = name
+                        this.petType = type
+                        this.age = petAge
+                        this.id = initialPet?.id ?: "" // Use existing ID if editing
+                    }
+                    onAddPet(pet, if (hasOwner) selectedOwner?.id else null)
                     onDismiss()
                 }
             ) {

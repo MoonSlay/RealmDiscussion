@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,13 +33,19 @@ fun HomeScreen(navController: NavController){
         )
         Spacer(modifier = Modifier.height(150.dp))
         Button(
-            onClick = {navController.navigate(AppNavRoutes.PetList.route)}
+            onClick = { navController.navigate(AppNavRoutes.PetList.route) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 25.dp)
         ) {
             Text("Pet list", style = MaterialTheme.typography.bodyMedium)
         }
         Spacer(modifier = Modifier.height(8.dp))
         Button(
-            onClick = {navController.navigate(AppNavRoutes.OwnerList.route)}
+            onClick = { navController.navigate(AppNavRoutes.OwnerList.route) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 25.dp)
         ) {
             Text("Owner list", style = MaterialTheme.typography.bodyMedium)
         }
