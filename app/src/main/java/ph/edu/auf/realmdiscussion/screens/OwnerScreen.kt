@@ -7,11 +7,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ph.edu.auf.realmdiscussion.components.DismissBackground
 import ph.edu.auf.realmdiscussion.database.realmodel.OwnerModel
+import ph.edu.auf.realmdiscussion.ui.theme.barrioFontFamily
 import ph.edu.auf.realmdiscussion.viewmodels.OwnerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -20,7 +25,14 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel()) {
     val owners by ownerViewModel.owners.collectAsState()
     var editingOwner by remember { mutableStateOf<OwnerModel?>(null) }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize())
+    {
+        Text(
+            text = "===-- Owner List --===",
+            style = MaterialTheme.typography.headlineSmall
+        )
         Scaffold { paddingValues ->
             LazyColumn(modifier = Modifier.padding(paddingValues)) {
                 itemsIndexed(

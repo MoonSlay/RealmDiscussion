@@ -1,6 +1,7 @@
 package ph.edu.auf.realmdiscussion.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -45,11 +46,16 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import ph.edu.auf.realmdiscussion.R
 import ph.edu.auf.realmdiscussion.database.realmodel.OwnerModel
 import ph.edu.auf.realmdiscussion.database.realmodel.PetModel
+import ph.edu.auf.realmdiscussion.ui.theme.barrioFontFamily
 import ph.edu.auf.realmdiscussion.viewmodels.OwnerViewModel
 
 // Define a data class for PetType
@@ -59,7 +65,10 @@ data class PetType(val name: String, val imageRes: Int)
 val petTypes = listOf(
     PetType("Dog", R.drawable.dog),
     PetType("Cat", R.drawable.cat),
-    PetType("Bird", R.drawable.bird)
+    PetType("Bird", R.drawable.bird),
+    PetType("Fish", R.drawable.fish),
+    PetType("Snake", R.drawable.snake),
+    PetType("Hamster", R.drawable.hamster),
 )
 
 @Composable
@@ -129,7 +138,14 @@ fun PetScreen(
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
         ) { paddingValues ->
-            Column(modifier = Modifier.padding(paddingValues)) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(paddingValues))
+            {
+                Text(
+                    text = "===-- Pet List --===",
+                    style = MaterialTheme.typography.headlineSmall
+                )
                 TextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },

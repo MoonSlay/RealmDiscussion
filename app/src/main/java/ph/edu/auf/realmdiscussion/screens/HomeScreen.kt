@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,24 +26,20 @@ fun HomeScreen(navController: NavController){
         modifier = Modifier.fillMaxSize())
     {
         Text(
-           text = "Pet Realm \n Sampler",
-            style = TextStyle(
-                fontFamily = barrioFontFamily ,
-                fontWeight = FontWeight.Bold,
-                fontSize = 75.sp
-            )
+            text = "Pet Realm \n Sampler",
+            style = MaterialTheme.typography.headlineLarge
         )
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(150.dp))
         Button(
             onClick = {navController.navigate(AppNavRoutes.PetList.route)}
         ) {
-            Text("Pet list")
+            Text("Pet list", style = MaterialTheme.typography.bodyMedium)
         }
         Spacer(modifier = Modifier.height(8.dp))
         Button(
             onClick = {navController.navigate(AppNavRoutes.OwnerList.route)}
         ) {
-            Text("Owner list")
+            Text("Owner list", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
