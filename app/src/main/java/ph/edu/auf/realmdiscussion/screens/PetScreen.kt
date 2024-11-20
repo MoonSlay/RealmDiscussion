@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -51,6 +52,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.sp
 import ph.edu.auf.realmdiscussion.R
 import ph.edu.auf.realmdiscussion.database.realmodel.OwnerModel
@@ -77,7 +79,7 @@ fun PetScreen(
     ownerViewModel: OwnerViewModel = viewModel()
 ) {
     val pets by petViewModel.pets.collectAsState()
-    val owners by ownerViewModel.owners.collectAsState() // Observe owners state
+    val owners by ownerViewModel.owners.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
@@ -163,7 +165,7 @@ fun PetScreen(
                     ) { _, petContent ->
                         ItemPet(
                             petModel = petContent,
-                            owners = owners, // Pass the owners list here
+                            owners = owners,
                             onRemove = petViewModel::deletePet,
                             onEdit = { showEditPetDialog = it }
                         )
@@ -189,11 +191,15 @@ fun AddPetDialog(
     onAddPet: (PetModel, String?) -> Unit,
     owners: List<OwnerModel>,
     onAddOwner: (String) -> Unit,
-    initialPet: PetModel? = null
+    initialPet: PetModel? = null,
+    ownerViewModel: OwnerViewModel = viewModel()
 ) {
+    // State management for dialog fields
     var name by remember { mutableStateOf(initialPet?.name ?: "") }
     var type by remember { mutableStateOf(initialPet?.petType ?: "") }
     var age by remember { mutableStateOf(initialPet?.age?.toString() ?: "") }
+    val errorMessage by ownerViewModel.errorMessage.collectAsState()
+    val showMessage by ownerViewModel.showSnackbar.collectAsState()
     var petTypeExpanded by remember { mutableStateOf(false) }
     var hasOwner by remember { mutableStateOf(initialPet?.let { owners.any { owner -> owner.pets.any { it.id == initialPet.id } } } ?: false) }
     var ownerExpanded by remember { mutableStateOf(false) }
@@ -202,6 +208,7 @@ fun AddPetDialog(
     var showAddOwnerDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
+    // Show dialog to add a new owner
     if (showAddOwnerDialog) {
         AlertDialog(
             onDismissRequest = { showAddOwnerDialog = false },
@@ -234,19 +241,22 @@ fun AddPetDialog(
         )
     }
 
+    // Main dialog for adding or editing a pet
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = if (initialPet == null) "Add New Pet" else "Edit Pet") },
         text = {
             Column {
+                // Pet name input field
                 TextField(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("Pet Name") }
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(5.dp))
 
+                // Pet type dropdown
                 ExposedDropdownMenuBox(
                     expanded = petTypeExpanded,
                     onExpandedChange = { petTypeExpanded = !petTypeExpanded }
@@ -278,12 +288,18 @@ fun AddPetDialog(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+
+                Spacer(modifier = Modifier.height(5.dp))
+
+                // Pet age input field
                 TextField(
                     value = age,
                     onValueChange = { age = it },
-                    label = { Text("Pet Age") }
+                    label = { Text("Pet Age") },
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
                 )
+
+                // Checkbox to assign pet to owner
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
                         checked = hasOwner,
@@ -291,6 +307,24 @@ fun AddPetDialog(
                     )
                     Text(text = "Assign Pet Owner")
                 }
+                // Display error message if it exists
+                errorMessage?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+                showMessage?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+                // Owner dropdown when assigning a pet owner
                 if (hasOwner) {
                     ExposedDropdownMenuBox(
                         expanded = ownerExpanded,
@@ -323,6 +357,8 @@ fun AddPetDialog(
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.height(5.dp))
+                    // Button to show the "Add Owner" dialog
                     Button(onClick = { showAddOwnerDialog = true }) {
                         Icon(imageVector = Icons.Default.Add, contentDescription = "Add Owner")
                         Text("Add New Owner")
