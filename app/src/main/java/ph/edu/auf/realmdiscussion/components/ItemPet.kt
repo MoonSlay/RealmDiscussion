@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -23,6 +24,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import ph.edu.auf.realmdiscussion.R
 import ph.edu.auf.realmdiscussion.database.realmodel.OwnerModel
 import ph.edu.auf.realmdiscussion.database.realmodel.PetModel
 import ph.edu.auf.realmdiscussion.screens.petTypes
@@ -71,38 +73,35 @@ fun ItemPet(
             ) {
                 Row(modifier = Modifier.padding(16.dp)) {
                     val petType = petTypes.find { it.name == petModel.petType }
-                    petType?.let {
-                        Image(
-                            painter = painterResource(id = it.imageRes),
-                            contentDescription = it.name,
-                            modifier = Modifier
-                                .height(100.dp)
-                                .padding(start = 16.dp)
-                        )
-                    }
+                    val imageRes = petType?.imageRes ?: R.drawable.none
+                    Image(
+                        painter = painterResource(id = imageRes),
+                        contentDescription = petModel.petType,
+                        modifier = Modifier.size(100.dp)
+                    )
                     Spacer(modifier = Modifier.width(15.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = petModel.name,
+                            text = "Pet Name: ${if (petModel.name.isNotEmpty()) petModel.name else "N/A"}",
                             style = MaterialTheme.typography.headlineSmall,
                             maxLines = 1
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "${petModel.age} years old",
+                            text = "Pet Age: ${if (petModel.age > 0) "${petModel.age} years old" else "N/A"}",
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 1
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = petModel.petType,
+                            text = "Pet Type: ${if (petModel.petType.isNotEmpty()) petModel.petType else "N/A"}",
                             style = MaterialTheme.typography.labelSmall,
                             maxLines = 1
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         owner?.let {
                             Text(
-                                text = "Owner: ${it.name}",
+                                text = "Pet Owner: ${it.name}",
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 1
                             )

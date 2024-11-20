@@ -58,6 +58,10 @@ class PetViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val realm = RealmHelper.getRealmInstance()
             realm.write {
+                // Generate a unique ID for the new pet if it is not set
+                if (pet.id.isEmpty()) {
+                    pet.id = java.util.UUID.randomUUID().toString()
+                }
                 val newPet = copyToRealm(pet)
                 val unmanagedPet = realm.copyFromRealm(newPet)
                 _pets.update { it + unmanagedPet }
