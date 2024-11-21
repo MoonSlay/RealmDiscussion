@@ -13,7 +13,11 @@ import ph.edu.auf.realmdiscussion.screens.PetScreen
 fun AppNavigation(navController: NavHostController){
     NavHost(navController, startDestination = AppNavRoutes.Home.route){
         composable(AppNavRoutes.Home.route){ HomeScreen(navController)}
-        composable(AppNavRoutes.PetList.route){ PetScreen()}
-        composable(AppNavRoutes.OwnerList.route){ OwnerScreen()}
+        composable(AppNavRoutes.PetList.route) {
+            PetScreen(onBack = { navController.popBackStack() })
+        }
+        composable(AppNavRoutes.OwnerList.route) {
+            OwnerScreen(onBack = { navController.popBackStack() })
+        }
     }
 }

@@ -5,7 +5,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,13 +21,14 @@ import ph.edu.auf.realmdiscussion.viewmodels.OwnerViewModel
 import ph.edu.auf.realmdiscussion.database.realmodel.OwnerModel
 
 @Composable
-fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel()) {
+fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel(), onBack: () -> Unit) {
     val owners by ownerViewModel.owners.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     var snackbarShown by remember { mutableStateOf(false) }
     var showAddOwnerDialog by remember { mutableStateOf(false) }
     var showEditOwnerDialog by remember { mutableStateOf<OwnerModel?>(null) }
+    val errorMessage by ownerViewModel.errorMessage.collectAsState()
 
     LaunchedEffect(ownerViewModel.showSnackbar) {
         ownerViewModel.showSnackbar.collect { message ->
@@ -83,6 +86,14 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel()) {
                     text = "===-- Owner List --===",
                     style = MaterialTheme.typography.headlineSmall
                 )
+                errorMessage?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
                 LazyColumn {
                     itemsIndexed(
                         items = owners,
@@ -105,6 +116,15 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel()) {
         ) {
             Icon(imageVector = Icons.Default.Add, contentDescription = "Add Owner")
         }
+
+        FloatingActionButton(
+            onClick = onBack,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)
+        ) {
+            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+        }
     }
 }
 
@@ -120,11 +140,36 @@ fun EditOwnerDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = "Edit Owner Name") },
         text = {
-            TextField(
-                value = newName,
-                onValueChange = { newName = it },
-                label = { Text("Owner Name") }
-            )
+            Column {
+                TextField(
+                    value = newName,
+                    onValueChange = { newName = it },
+                    label = { Text("Owner Name") }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Pets owned by ${owner.name}:")
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = "Name", style = MaterialTheme.typography.bodyMedium)
+                        owner.pets.forEach { pet ->
+                            Text(text = pet.name)
+                        }
+                        if (owner.pets.isEmpty()) {
+                            Text(text = "None")
+                        }
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = "Type", style = MaterialTheme.typography.bodyMedium)
+                        owner.pets.forEach { pet ->
+                            Text(text = pet.petType)
+                        }
+                        if (owner.pets.isEmpty()) {
+                            Text(text = "N/A")
+                        }
+                    }
+                }
+            }
         },
         confirmButton = {
             Button(onClick = {

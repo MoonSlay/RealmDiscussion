@@ -39,6 +39,7 @@ class OwnerViewModel : ViewModel() {
     fun addOwner(owner: OwnerModel) {
         viewModelScope.launch(Dispatchers.IO) {
             val realm = RealmHelper.getRealmInstance()
+
             // Check if the owner already exists
             val existingOwner = realm.query<OwnerModel>("name == $0", owner.name).first().find()
             if (existingOwner != null) {

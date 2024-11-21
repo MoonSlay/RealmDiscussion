@@ -40,6 +40,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -70,7 +72,7 @@ val petTypes = listOf(
 fun PetScreen(
     petViewModel: PetViewModel = viewModel(),
     ownerViewModel: OwnerViewModel = viewModel()
-) {
+    , onBack: () -> Unit){
     val pets by petViewModel.pets.collectAsState()
     val owners by ownerViewModel.owners.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -175,6 +177,14 @@ fun PetScreen(
                 .padding(16.dp)
         ) {
             Icon(imageVector = Icons.Default.Add, contentDescription = "Add Pet")
+        }
+        FloatingActionButton(
+            onClick = onBack,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)
+        ) {
+            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
         }
     }
 }
