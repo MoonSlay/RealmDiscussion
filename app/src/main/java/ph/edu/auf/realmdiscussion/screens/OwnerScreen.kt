@@ -14,6 +14,7 @@ import ph.edu.auf.realmdiscussion.components.DismissBackground
 import ph.edu.auf.realmdiscussion.database.realmodel.OwnerModel
 import ph.edu.auf.realmdiscussion.viewmodels.OwnerViewModel
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel()) {
@@ -38,7 +39,7 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel()) {
                         confirmValueChange = {
                             when (it) {
                                 SwipeToDismissBoxValue.StartToEnd -> {
-                                    ownerViewModel.deleteOwner(ownerContent.id)
+                                    ownerViewModel.deleteOwner(ownerContent)
                                 }
                                 SwipeToDismissBoxValue.EndToStart -> {
                                     editingOwner = ownerContent
@@ -88,7 +89,7 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel()) {
             owner = owner,
             onDismiss = { editingOwner = null },
             onSave = { newName ->
-                ownerViewModel.updateOwner(owner.id, newName)
+                ownerViewModel.updateOwner(owner, newName)
             }
         )
     }

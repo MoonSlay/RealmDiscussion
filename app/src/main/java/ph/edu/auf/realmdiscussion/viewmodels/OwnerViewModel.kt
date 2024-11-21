@@ -60,30 +60,32 @@ class OwnerViewModel : ViewModel() {
         }
     }
 
-    fun updateOwner(id: String, newName: String) {
+    fun updateOwner(owner: OwnerModel, newName: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val realm = RealmHelper.getRealmInstance()
             realm.write {
-                val owner = this.query<OwnerModel>("id == $0", id).first().find()
-                owner?.name = newName
-                val unmanagedOwner = realm.copyFromRealm(owner!!)
+                val existingOwner = this.query<OwnerModel>("id == $0", owner.id).first().find()
+                existingOwner?.name = newName
+                val unmanagedOwner = realm.copyFromRealm(existingOwner!!)
                 _owners.update { owners ->
-                    owners.map { if (it.id == id) unmanagedOwner else it }
+                    owners.map { if (it.id == owner.id) unmanagedOwner else it }
                 }
             }
+            _showSnackbar.emit("Updated owner: ${owner.name}")
         }
     }
 
-    fun deleteOwner(id: String) {
+    fun deleteOwner(owner: OwnerModel) {
         viewModelScope.launch(Dispatchers.IO) {
             val realm = RealmHelper.getRealmInstance()
             realm.write {
-                val owner = this.query<OwnerModel>("id == $0", id).first().find()
-                owner?.let {
+                val existingOwner = this.query<OwnerModel>("id == $0", owner.id).first().find()
+                existingOwner?.let {
                     delete(it)
-                    _owners.update { owners -> owners.filter { it.id != id } }
+                    _owners.update { owners -> owners.filter { it.id != owner.id } }
                 }
             }
+            _showSnackbar.emit("Deleted owner: ${owner.name}")
         }
     }
 }
