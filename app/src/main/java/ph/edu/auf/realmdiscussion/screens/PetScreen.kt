@@ -1,6 +1,5 @@
 package ph.edu.auf.realmdiscussion.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,22 +41,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.sp
 import ph.edu.auf.realmdiscussion.R
 import ph.edu.auf.realmdiscussion.database.realmodel.OwnerModel
 import ph.edu.auf.realmdiscussion.database.realmodel.PetModel
-import ph.edu.auf.realmdiscussion.ui.theme.barrioFontFamily
 import ph.edu.auf.realmdiscussion.viewmodels.OwnerViewModel
 
 // Define a data class for PetType
@@ -116,7 +109,8 @@ fun PetScreen(
             },
             owners = owners,
             onAddOwner = { ownerName ->
-                ownerViewModel.addOwner(ownerName)
+                val newOwner = OwnerModel().apply { name = ownerName }
+                ownerViewModel.addOwner(newOwner)
             }
         )
     }
@@ -130,7 +124,8 @@ fun PetScreen(
             },
             owners = owners,
             onAddOwner = { ownerName ->
-                ownerViewModel.addOwner(ownerName)
+                val newOwner = OwnerModel().apply { name = ownerName }
+                ownerViewModel.addOwner(newOwner)
             },
             initialPet = showEditPetDialog
         )

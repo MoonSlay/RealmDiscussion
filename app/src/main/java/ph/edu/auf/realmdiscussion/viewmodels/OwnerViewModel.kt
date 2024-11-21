@@ -36,29 +36,27 @@ class OwnerViewModel : ViewModel() {
         }
     }
 
-    fun addOwner(name: String) {
+    fun addOwner(owner: OwnerModel) {
         viewModelScope.launch(Dispatchers.IO) {
             val realm = RealmHelper.getRealmInstance()
             // Check if the owner already exists
-            val existingOwner = realm.query<OwnerModel>("name == $0", name).first().find()
+            val existingOwner = realm.query<OwnerModel>("name == $0", owner.name).first().find()
             if (existingOwner != null) {
                 // Set an error message if the owner already exists
-                _errorMessage.emit("Owner with name '$name' already exists!")
+                _errorMessage.emit("Owner with name '${owner.name}' already exists!")
                 return@launch
             }
 
             realm.write {
                 // Proceed to add the new owner if no duplicate was found
-                val newOwner = copyToRealm(OwnerModel().apply {
-                    this.name = name
-                })
+                val newOwner = copyToRealm(owner)
                 val unmanagedOwner = realm.copyFromRealm(newOwner)
                 _owners.update { it + unmanagedOwner }
             }
 
             // Clear any previous error message
             _errorMessage.update { null }
-            _showSnackbar.emit("Added owner: $name")
+            _showSnackbar.emit("Added owner: ${owner.name}")
         }
     }
 

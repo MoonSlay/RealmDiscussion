@@ -4,19 +4,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ph.edu.auf.realmdiscussion.components.DismissBackground
 import ph.edu.auf.realmdiscussion.database.realmodel.OwnerModel
-import ph.edu.auf.realmdiscussion.ui.theme.barrioFontFamily
 import ph.edu.auf.realmdiscussion.viewmodels.OwnerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

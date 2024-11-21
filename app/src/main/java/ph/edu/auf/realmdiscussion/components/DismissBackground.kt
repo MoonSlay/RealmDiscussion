@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SwipeToDismissBoxState
@@ -42,7 +43,7 @@ fun DismissBackground(dismissState : SwipeToDismissBoxState){
         )
         Spacer(modifier = Modifier)
         Icon(
-            Icons.Default.AddCircle,
+            Icons.Default.Edit,
             contentDescription = "Archive"
         )
     }
