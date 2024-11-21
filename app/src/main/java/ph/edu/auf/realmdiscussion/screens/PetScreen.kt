@@ -321,6 +321,7 @@ fun AddPetDialog(
                         modifier = Modifier.padding(8.dp)
                     )
                 }
+                // Display success message if it added successfully
                 showMessage?.let {
                     Text(
                         text = it,
