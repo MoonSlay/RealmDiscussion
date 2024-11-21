@@ -54,7 +54,7 @@ class PetViewModel : ViewModel() {
         }
     }
 
-    fun addPet(pet: PetModel, ownerId: String?) {
+    fun addPet(pet: PetModel, owner: OwnerModel?) {
         viewModelScope.launch(Dispatchers.IO) {
             val realm = RealmHelper.getRealmInstance()
             realm.write {
@@ -66,16 +66,16 @@ class PetViewModel : ViewModel() {
                 val unmanagedPet = realm.copyFromRealm(newPet)
                 _pets.update { it + unmanagedPet }
 
-                ownerId?.let {
-                    val owner = this.query<OwnerModel>("id == $0", it).first().find()
-                    owner?.pets?.add(newPet)
+                owner?.let {
+                    val managedOwner = this.query<OwnerModel>("id == $0", it.id).first().find()
+                    managedOwner?.pets?.add(newPet)
                 }
             }
             _showSnackbar.emit("Added ${pet.name}")
         }
     }
 
-    fun updatePet(pet: PetModel, ownerId: String?) {
+    fun updatePet(pet: PetModel, owner: OwnerModel?) {
         viewModelScope.launch(Dispatchers.IO) {
             val realm = RealmHelper.getRealmInstance()
             realm.write {
@@ -95,9 +95,9 @@ class PetViewModel : ViewModel() {
                 previousOwner?.pets?.remove(existingPet)
 
                 // Add pet to new owner's list
-                ownerId?.let {
-                    val newOwner = this.query<OwnerModel>("id == $0", it).first().find()
-                    newOwner?.pets?.add(existingPet)
+                owner?.let {
+                    val managedOwner = this.query<OwnerModel>("id == $0", it.id).first().find()
+                    managedOwner?.pets?.add(existingPet)
                 }
             }
             _showSnackbar.emit("Updated ${pet.name}")

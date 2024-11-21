@@ -105,8 +105,8 @@ fun PetScreen(
     if (showAddPetDialog) {
         AddPetDialog(
             onDismiss = { showAddPetDialog = false },
-            onAddPet = { pet, ownerId ->
-                petViewModel.addPet(pet, ownerId)
+            onAddPet = { pet, owner ->
+                petViewModel.addPet(pet, owner)
                 showAddPetDialog = false
             },
             owners = owners,
@@ -120,8 +120,8 @@ fun PetScreen(
     if (showEditPetDialog != null) {
         AddPetDialog(
             onDismiss = { showEditPetDialog = null },
-            onAddPet = { pet, ownerId ->
-                petViewModel.updatePet(pet, ownerId)
+            onAddPet = { pet, owner ->
+                petViewModel.updatePet(pet, owner)
                 showEditPetDialog = null
             },
             owners = owners,
@@ -193,7 +193,7 @@ fun PetScreen(
 @Composable
 fun AddPetDialog(
     onDismiss: () -> Unit,
-    onAddPet: (PetModel, String?) -> Unit,
+    onAddPet: (PetModel, OwnerModel?) -> Unit,
     owners: List<OwnerModel>,
     onAddOwner: (String) -> Unit,
     initialPet: PetModel? = null,
@@ -382,7 +382,7 @@ fun AddPetDialog(
                         this.age = petAge
                         this.id = initialPet?.id ?: "" // Use existing ID if editing
                     }
-                    onAddPet(pet, if (hasOwner) selectedOwner?.id else null)
+                    onAddPet(pet, if (hasOwner) selectedOwner else null)
                     onDismiss()
                 }
             ) {
