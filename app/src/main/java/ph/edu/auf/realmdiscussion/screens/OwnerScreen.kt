@@ -29,6 +29,7 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel(), onBack: () -> Unit
     var showAddOwnerDialog by remember { mutableStateOf(false) }
     var showEditOwnerDialog by remember { mutableStateOf<OwnerModel?>(null) }
     val errorMessage by ownerViewModel.errorMessage.collectAsState()
+    var searchQuery by remember { mutableStateOf("") }
 
     LaunchedEffect(ownerViewModel.showSnackbar) {
         ownerViewModel.showSnackbar.collect { message ->
@@ -74,18 +75,30 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel(), onBack: () -> Unit
         )
     }
 
+    val filteredOwners = owners.filter { it.name.contains(searchQuery, ignoreCase = true) }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
         ) { paddingValues ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally,
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(paddingValues))
-            {
+                modifier = Modifier.padding(paddingValues)
+            ) {
+                //owner title
                 Text(
                     text = "===-- Owner List --===",
                     style = MaterialTheme.typography.headlineSmall
                 )
+                //search field
+                TextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    label = { Text("Search Owners") },
+                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                )
+                //Message for adding same owner name
                 errorMessage?.let {
                     Text(
                         text = it,
@@ -94,11 +107,13 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel(), onBack: () -> Unit
                         modifier = Modifier.padding(8.dp)
                     )
                 }
+                //function for scrolling through the owners
                 LazyColumn {
                     itemsIndexed(
-                        items = owners,
+                        items = filteredOwners,
                         key = { _, item -> item.id }
                     ) { _, ownerContent ->
+                        //owner content
                         ItemOwner(
                             ownerModel = ownerContent,
                             onRemove = ownerViewModel::deleteOwner,
@@ -108,6 +123,7 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel(), onBack: () -> Unit
                 }
             }
         }
+        //Floating action button for adding owner
         FloatingActionButton(
             onClick = { showAddOwnerDialog = true },
             modifier = Modifier
@@ -117,6 +133,7 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel(), onBack: () -> Unit
             Icon(imageVector = Icons.Default.Add, contentDescription = "Add Owner")
         }
 
+        //Floating action button for going back
         FloatingActionButton(
             onClick = onBack,
             modifier = Modifier
@@ -134,6 +151,7 @@ fun EditOwnerDialog(
     onDismiss: () -> Unit,
     onSave: (String) -> Unit
 ) {
+    //owner new name
     var newName by remember { mutableStateOf(owner.name) }
 
     AlertDialog(
