@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +29,7 @@ import ph.edu.auf.realmdiscussion.R
 import ph.edu.auf.realmdiscussion.database.realmodel.OwnerModel
 import ph.edu.auf.realmdiscussion.database.realmodel.PetModel
 import ph.edu.auf.realmdiscussion.screens.petTypes
+import androidx.compose.ui.Alignment
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +37,8 @@ fun ItemPet(
     petModel: PetModel,
     owners: List<OwnerModel>,
     onRemove: (PetModel) -> Unit,
-    onEdit: (PetModel) -> Unit
+    onEdit: (PetModel) -> Unit,
+    onAdopt: (PetModel) -> Unit
 ) {
     val currentItem by rememberUpdatedState(petModel)
 
@@ -82,7 +85,7 @@ fun ItemPet(
                     Spacer(modifier = Modifier.width(15.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Pet Name: ${if (petModel.name.isNotEmpty()) petModel.name else "N/A"}",
+                            text = "Pet Name: ${petModel.name.ifEmpty { "N/A" }}",
                             style = MaterialTheme.typography.headlineSmall,
                             maxLines = 1
                         )
@@ -94,7 +97,7 @@ fun ItemPet(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Pet Type: ${if (petModel.petType.isNotEmpty()) petModel.petType else "N/A"}",
+                            text = "Pet Type: ${petModel.petType.ifEmpty { "N/A" }}",
                             style = MaterialTheme.typography.labelSmall,
                             maxLines = 1
                         )
@@ -105,6 +108,14 @@ fun ItemPet(
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 1
                             )
+                        }
+                    }
+                    if (owner == null) {
+                        Button(
+                            onClick = { onAdopt(petModel) },
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        ) {
+                            Text("Adopt Pet")
                         }
                     }
                 }

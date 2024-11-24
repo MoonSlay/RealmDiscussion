@@ -103,4 +103,16 @@ class PetViewModel : ViewModel() {
             _showSnackbar.emit("Updated ${pet.name}")
         }
     }
+
+    fun adoptPet(pet: PetModel, owner: OwnerModel) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val realm = RealmHelper.getRealmInstance()
+            realm.write {
+                val managedPet = this.query<PetModel>("id == $0", pet.id).first().find()
+                val managedOwner = this.query<OwnerModel>("id == $0", owner.id).first().find()
+                managedOwner?.pets?.add(managedPet!!)
+            }
+            _showSnackbar.emit("Adopted ${pet.name} by ${owner.name}")
+        }
+    }
 }

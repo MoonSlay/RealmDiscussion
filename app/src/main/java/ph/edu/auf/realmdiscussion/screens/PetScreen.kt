@@ -71,8 +71,9 @@ val petTypes = listOf(
 @Composable
 fun PetScreen(
     petViewModel: PetViewModel = viewModel(),
-    ownerViewModel: OwnerViewModel = viewModel()
-    , onBack: () -> Unit){
+    ownerViewModel: OwnerViewModel = viewModel(),
+    onBack: () -> Unit
+) {
     val pets by petViewModel.pets.collectAsState()
     val owners by ownerViewModel.owners.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -81,6 +82,7 @@ fun PetScreen(
     var snackbarShown by remember { mutableStateOf(false) }
     var showAddPetDialog by remember { mutableStateOf(false) }
     var showEditPetDialog by remember { mutableStateOf<PetModel?>(null) }
+    var showAdoptPetDialog by remember { mutableStateOf<PetModel?>(null) }
 
     LaunchedEffect(petViewModel.showSnackbar) {
         petViewModel.showSnackbar.collect { message ->
@@ -133,14 +135,31 @@ fun PetScreen(
         )
     }
 
+    if (showAdoptPetDialog != null) {
+        AdoptPetDialog(
+            pet = showAdoptPetDialog!!,
+            owners = owners,
+            onDismiss = { showAdoptPetDialog = null },
+            onAdopt = { pet, owner ->
+                petViewModel.adoptPet(pet, owner)
+                showAdoptPetDialog = null
+            },
+            onAddOwner = { ownerName ->
+                val newOwner = OwnerModel().apply { name = ownerName }
+                ownerViewModel.addOwner(newOwner)
+            }
+        )
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
         ) { paddingValues ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally,
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(paddingValues))
-            {
+                modifier = Modifier.padding(paddingValues)
+            ) {
                 Text(
                     text = "===-- Pet List --===",
                     style = MaterialTheme.typography.headlineSmall
@@ -164,7 +183,10 @@ fun PetScreen(
                             petModel = petContent,
                             owners = owners,
                             onRemove = petViewModel::deletePet,
-                            onEdit = { showEditPetDialog = it }
+                            onEdit = { showEditPetDialog = it },
+                            onAdopt = { pet ->
+                                showAdoptPetDialog = pet
+                            }
                         )
                     }
                 }
@@ -387,6 +409,116 @@ fun AddPetDialog(
                 }
             ) {
                 Text(if (initialPet == null) "Add" else "Save")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AdoptPetDialog(
+    pet: PetModel,
+    owners: List<OwnerModel>,
+    onDismiss: () -> Unit,
+    onAdopt: (PetModel, OwnerModel) -> Unit,
+    onAddOwner: (String) -> Unit
+) {
+    var selectedOwner by remember { mutableStateOf<OwnerModel?>(null) }
+    var newOwnerName by remember { mutableStateOf("") }
+    var showAddOwnerDialog by remember { mutableStateOf(false) }
+    var ownerExpanded by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
+    if (showAddOwnerDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddOwnerDialog = false },
+            title = { Text(text = "Add New Owner") },
+            text = {
+                TextField(
+                    value = newOwnerName,
+                    onValueChange = { newOwnerName = it },
+                    label = { Text("Owner Name") }
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            onAddOwner(newOwnerName)
+                            newOwnerName = ""
+                            showAddOwnerDialog = false
+                        }
+                    }
+                ) {
+                    Text("Add")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showAddOwnerDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Adopt Pet") },
+        text = {
+            Column {
+                Text(text = "Select an owner for ${pet.name}:")
+                Spacer(modifier = Modifier.height(8.dp))
+                ExposedDropdownMenuBox(
+                    expanded = ownerExpanded,
+                    onExpandedChange = { ownerExpanded = !ownerExpanded }
+                ) {
+                    OutlinedTextField(
+                        value = selectedOwner?.name ?: "",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Owner") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = ownerExpanded)
+                        },
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = ownerExpanded,
+                        onDismissRequest = { ownerExpanded = false }
+                    ) {
+                        owners.forEach { owner ->
+                            DropdownMenuItem(
+                                text = { Text(owner.name) },
+                                onClick = {
+                                    selectedOwner = owner
+                                    ownerExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = { showAddOwnerDialog = true }) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add Owner")
+                    Text("Add New Owner")
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    selectedOwner?.let { onAdopt(pet, it) }
+                    onDismiss()
+                }
+            ) {
+                Text("Adopt")
             }
         },
         dismissButton = {

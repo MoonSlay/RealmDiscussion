@@ -58,7 +58,7 @@ fun ItemOwner(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = ownerModel.name,
+                        text = "Owner Name: ${ownerModel.name.ifEmpty { "No Name" }}",
                         style = MaterialTheme.typography.headlineSmall
                     )
                     Spacer(modifier = Modifier.height(8.dp))
