@@ -36,6 +36,7 @@ fun ItemPet(
             when (it) {
                 SwipeToDismissBoxValue.StartToEnd -> {
                     onRemove(currentItem)
+                    return@rememberSwipeToDismissBoxState false
                 }
                 SwipeToDismissBoxValue.EndToStart -> {
                     onEdit(currentItem)
@@ -45,7 +46,6 @@ fun ItemPet(
                     return@rememberSwipeToDismissBoxState false
                 }
             }
-            return@rememberSwipeToDismissBoxState true
         },
         positionalThreshold = { it * .25f }
     )

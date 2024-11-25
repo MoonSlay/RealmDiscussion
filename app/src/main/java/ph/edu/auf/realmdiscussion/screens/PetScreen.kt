@@ -197,7 +197,7 @@ fun PetScreen(
             onClick = { showAddPetDialog = true },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp)
+                .padding(end = 16.dp, bottom = 75.dp)
         ) {
             Icon(imageVector = Icons.Default.Add, contentDescription = "Add Pet")
         }
@@ -205,7 +205,7 @@ fun PetScreen(
             onClick = onBack,
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(16.dp)
+                .padding(start = 16.dp, bottom = 75.dp)
         ) {
             Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
         }
@@ -222,21 +222,18 @@ fun AddPetDialog(
     initialPet: PetModel? = null,
     ownerViewModel: OwnerViewModel = viewModel()
 ) {
-    // State management for dialog fields
     var name by remember { mutableStateOf(initialPet?.name ?: "") }
     var type by remember { mutableStateOf(initialPet?.petType ?: "") }
     var age by remember { mutableStateOf(initialPet?.age?.toString() ?: "") }
-    val errorMessage by ownerViewModel.errorMessage.collectAsState()
-    val showMessage by ownerViewModel.showSnackbar.collectAsState()
-    var petTypeExpanded by remember { mutableStateOf(false) }
     var hasOwner by remember { mutableStateOf(initialPet?.let { owners.any { owner -> owner.pets.any { it.id == initialPet.id } } } ?: false) }
     var ownerExpanded by remember { mutableStateOf(false) }
     var selectedOwner by remember { mutableStateOf<OwnerModel?>(initialPet?.let { owners.find { owner -> owner.pets.any { it.id == initialPet.id } } }) }
     var newOwnerName by remember { mutableStateOf("") }
     var showAddOwnerDialog by remember { mutableStateOf(false) }
+    var petTypeExpanded by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    var showError by remember { mutableStateOf(false) }
 
-    // Show dialog to add a new owner
     if (showAddOwnerDialog) {
         AlertDialog(
             onDismissRequest = { showAddOwnerDialog = false },
@@ -269,22 +266,18 @@ fun AddPetDialog(
         )
     }
 
-    // Main dialog for adding or editing a pet
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = if (initialPet == null) "Add New Pet" else "Edit Pet") },
         text = {
             Column {
-                // Pet name input field
                 TextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Pet Name") }
+                    label = { Text("Pet Name") },
+                    isError = showError && name.isEmpty()
                 )
-
                 Spacer(modifier = Modifier.height(5.dp))
-
-                // Pet type dropdown
                 ExposedDropdownMenuBox(
                     expanded = petTypeExpanded,
                     onExpandedChange = { petTypeExpanded = !petTypeExpanded }
@@ -299,7 +292,8 @@ fun AddPetDialog(
                         },
                         modifier = Modifier
                             .menuAnchor()
-                            .fillMaxWidth()
+                            .fillMaxWidth(),
+                        isError = showError && type.isEmpty()
                     )
                     ExposedDropdownMenu(
                         expanded = petTypeExpanded,
@@ -316,18 +310,14 @@ fun AddPetDialog(
                         }
                     }
                 }
-
                 Spacer(modifier = Modifier.height(5.dp))
-
-                // Pet age input field
                 TextField(
                     value = age,
                     onValueChange = { age = it },
                     label = { Text("Pet Age") },
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                    isError = showError && age.isEmpty()
                 )
-
-                // Checkbox to assign pet to owner
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
                         checked = hasOwner,
@@ -335,25 +325,6 @@ fun AddPetDialog(
                     )
                     Text(text = "Assign Pet Owner")
                 }
-                // Display error message if it exists
-                errorMessage?.let {
-                    Text(
-                        text = it,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-                // Display success message if it added successfully
-                showMessage?.let {
-                    Text(
-                        text = it,
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-                // Owner dropdown when assigning a pet owner
                 if (hasOwner) {
                     ExposedDropdownMenuBox(
                         expanded = ownerExpanded,
@@ -387,26 +358,37 @@ fun AddPetDialog(
                         }
                     }
                     Spacer(modifier = Modifier.height(5.dp))
-                    // Button to show the "Add Owner" dialog
                     Button(onClick = { showAddOwnerDialog = true }) {
                         Icon(imageVector = Icons.Default.Add, contentDescription = "Add Owner")
                         Text("Add New Owner")
                     }
+                }
+                if (showError) {
+                    Text(
+                        text = "All fields are required",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
             }
         },
         confirmButton = {
             Button(
                 onClick = {
-                    val petAge = age.toIntOrNull() ?: 0
-                    val pet = PetModel().apply {
-                        this.name = name
-                        this.petType = type
-                        this.age = petAge
-                        this.id = initialPet?.id ?: "" // Use existing ID if editing
+                    if (name.isEmpty() || type.isEmpty() || age.isEmpty()) {
+                        showError = true
+                    } else {
+                        val petAge = age.toIntOrNull() ?: 0
+                        val pet = PetModel().apply {
+                            this.name = name
+                            this.petType = type
+                            this.age = petAge
+                            this.id = initialPet?.id ?: ""
+                        }
+                        onAddPet(pet, if (hasOwner) selectedOwner else null)
+                        onDismiss()
                     }
-                    onAddPet(pet, if (hasOwner) selectedOwner else null)
-                    onDismiss()
                 }
             ) {
                 Text(if (initialPet == null) "Add" else "Save")

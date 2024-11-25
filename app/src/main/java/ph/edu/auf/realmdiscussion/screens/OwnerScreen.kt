@@ -128,7 +128,7 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel(), onBack: () -> Unit
             onClick = { showAddOwnerDialog = true },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp)
+                .padding(end = 16.dp, bottom = 75.dp) // Adjusted padding
         ) {
             Icon(imageVector = Icons.Default.Add, contentDescription = "Add Owner")
         }
@@ -138,7 +138,7 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel(), onBack: () -> Unit
             onClick = onBack,
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(16.dp)
+                .padding(start = 16.dp, bottom = 75.dp) // Adjusted padding
         ) {
             Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
         }
@@ -211,23 +211,40 @@ fun AddOwnerDialog(
     onAddOwner: (String) -> Unit
 ) {
     var ownerName by remember { mutableStateOf("") }
+    var showError by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = "Add New Owner") },
         text = {
-            TextField(
-                value = ownerName,
-                onValueChange = { ownerName = it },
-                label = { Text("Owner Name") },
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text)
-            )
+            Column {
+                TextField(
+                    value = ownerName,
+                    onValueChange = { ownerName = it },
+                    label = { Text("Owner Name") },
+                    isError = showError && ownerName.isEmpty()
+                )
+                if (showError) {
+                    Text(
+                        text = "Owner name is required",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+            }
         },
         confirmButton = {
-            Button(onClick = {
-                onAddOwner(ownerName)
-                onDismiss()
-            }) {
+            Button(
+                onClick = {
+                    if (ownerName.isEmpty()) {
+                        showError = true
+                    } else {
+                        onAddOwner(ownerName)
+                        onDismiss()
+                    }
+                }
+            ) {
                 Text("Add")
             }
         },

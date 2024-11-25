@@ -61,9 +61,15 @@ class PetViewModel : ViewModel() {
             realm.write {
                 val pet = this.query<PetModel>("id == $0", model.id).first().find()
                 if (pet != null) {
-                    // Remove pet from owner before deletion
+                    // Check if the pet has an owner
                     val owner = this.query<OwnerModel>("pets.id == $0", model.id).first().find()
-                    owner?.pets?.remove(pet)
+                    if (owner != null) {
+                        viewModelScope.launch {
+                            _showSnackbar.emit("Unable to delete! ${model.name} has Owner")
+                        }
+                        return@write
+                    }
+
                     delete(pet)
 
                     _pets.update {
@@ -80,7 +86,9 @@ class PetViewModel : ViewModel() {
                     }
                 }
             }
-            _showSnackbar.emit("Removed ${model.name}")
+            viewModelScope.launch {
+                _showSnackbar.emit("Removed ${model.name}")
+            }
         }
     }
 

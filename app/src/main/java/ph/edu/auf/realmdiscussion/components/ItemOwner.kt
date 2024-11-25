@@ -13,6 +13,7 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ph.edu.auf.realmdiscussion.database.realmodel.OwnerModel
@@ -47,27 +48,40 @@ fun ItemOwner(
 
     SwipeToDismissBox(
         state = dismissState,
-        backgroundContent = { DismissBackground(dismissState) },
-        content = {
-            Card(
+        backgroundContent = { DismissBackground(dismissState) }
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(0.dp, 8.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
-                shape = RoundedCornerShape(5.dp)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                // Owner Information
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(
-                        text = "Owner Name: ${ownerModel.name.ifEmpty { "No Name" }}",
-                        style = MaterialTheme.typography.headlineSmall
+                        text = ownerModel.name.ifEmpty { "No Name" },
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
                     Text(
                         text = "Owns ${ownerModel.pets.size} pets",
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
         }
-    )
+    }
 }
