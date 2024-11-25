@@ -41,7 +41,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -231,7 +230,7 @@ fun AddPetDialog(
     var age by remember { mutableStateOf(initialPet?.age?.toString() ?: "") }
     var hasOwner by remember { mutableStateOf(initialPet?.let { owners.any { owner -> owner.pets.any { it.id == initialPet.id } } } ?: false) }
     var ownerExpanded by remember { mutableStateOf(false) }
-    var selectedOwner by remember { mutableStateOf<OwnerModel?>(initialPet?.let { owners.find { owner -> owner.pets.any { it.id == initialPet.id } } }) }
+    var selectedOwner by remember { mutableStateOf(initialPet?.let { owners.find { owner -> owner.pets.any { it.id == initialPet.id } } }) }
     var newOwnerName by remember { mutableStateOf("") }
     var showAddOwnerDialog by remember { mutableStateOf(false) }
     var petTypeExpanded by remember { mutableStateOf(false) }
@@ -246,7 +245,8 @@ fun AddPetDialog(
                 TextField(
                     value = newOwnerName,
                     onValueChange = { newOwnerName = it },
-                    label = { Text("Owner Name") }
+                    label = { Text("Owner Name") },
+                    singleLine = true
                 )
             },
             confirmButton = {
@@ -279,7 +279,8 @@ fun AddPetDialog(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("Pet Name") },
-                    isError = showError && name.isEmpty()
+                    isError = showError && name.isEmpty(),
+                    singleLine = true
                 )
                 Spacer(modifier = Modifier.height(5.dp))
                 ExposedDropdownMenuBox(
@@ -320,7 +321,8 @@ fun AddPetDialog(
                     onValueChange = { age = it },
                     label = { Text("Pet Age") },
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    isError = showError && age.isEmpty()
+                    isError = showError && age.isEmpty(),
+                    singleLine = true
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
@@ -429,7 +431,8 @@ fun AdoptPetDialog(
                 TextField(
                     value = newOwnerName,
                     onValueChange = { newOwnerName = it },
-                    label = { Text("Owner Name") }
+                    label = { Text("Owner Name") },
+                    singleLine = true
                 )
             },
             confirmButton = {

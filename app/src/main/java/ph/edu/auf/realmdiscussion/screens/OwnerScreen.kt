@@ -3,16 +3,13 @@ package ph.edu.auf.realmdiscussion.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
@@ -114,8 +111,11 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel(), onBack: () -> Unit
                 TextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    label = { Text("Search Owners") },
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    label = { Text("Search Pets") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp),
+                    singleLine = true
                 )
                 //Message for adding same owner name
                 errorMessage?.let {
@@ -162,7 +162,8 @@ fun EditOwnerDialog(
                 TextField(
                     value = newName,
                     onValueChange = { newName = it },
-                    label = { Text("Owner Name") }
+                    label = { Text("Owner Name") },
+                    singleLine = true
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "Pets owned by ${owner.name}:")
@@ -222,7 +223,8 @@ fun AddOwnerDialog(
                     value = ownerName,
                     onValueChange = { ownerName = it },
                     label = { Text("Owner Name") },
-                    isError = showError && ownerName.isEmpty()
+                    isError = showError && ownerName.isEmpty(),
+                    singleLine = true
                 )
                 if (showError) {
                     Text(
