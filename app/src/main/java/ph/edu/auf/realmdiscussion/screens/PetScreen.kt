@@ -112,6 +112,7 @@ fun PetScreen(
                 showAddPetDialog = false
             },
             owners = owners,
+            petOwners = petOwners, // Pass petOwners here
             onAddOwner = { ownerName ->
                 val newOwner = OwnerModel().apply { name = ownerName }
                 ownerViewModel.addOwner(newOwner)
@@ -127,6 +128,7 @@ fun PetScreen(
                 showEditPetDialog = null
             },
             owners = owners,
+            petOwners = petOwners, // Pass petOwners here
             onAddOwner = { ownerName ->
                 val newOwner = OwnerModel().apply { name = ownerName }
                 ownerViewModel.addOwner(newOwner)
@@ -221,16 +223,16 @@ fun AddPetDialog(
     onDismiss: () -> Unit,
     onAddPet: (PetModel, OwnerModel?) -> Unit,
     owners: List<OwnerModel>,
+    petOwners: Map<String, OwnerModel>, // Add this parameter
     onAddOwner: (String) -> Unit,
     initialPet: PetModel? = null,
-
-    ) {
+) {
     var name by remember { mutableStateOf(initialPet?.name ?: "") }
     var type by remember { mutableStateOf(initialPet?.petType ?: "") }
     var age by remember { mutableStateOf(initialPet?.age?.toString() ?: "") }
-    var hasOwner by remember { mutableStateOf(initialPet?.let { owners.any { owner -> owner.pets.any { it.id == initialPet.id } } } ?: false) }
+    var selectedOwner by remember { mutableStateOf(petOwners[initialPet?.id]) } // Use petOwners to set initial value
+    var hasOwner by remember { mutableStateOf(selectedOwner != null) } // Set hasOwner based on selectedOwner
     var ownerExpanded by remember { mutableStateOf(false) }
-    var selectedOwner by remember { mutableStateOf(initialPet?.let { owners.find { owner -> owner.pets.any { it.id == initialPet.id } } }) }
     var newOwnerName by remember { mutableStateOf("") }
     var showAddOwnerDialog by remember { mutableStateOf(false) }
     var petTypeExpanded by remember { mutableStateOf(false) }
