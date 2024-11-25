@@ -83,8 +83,8 @@ fun HomeScreen(navController: NavController) {
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Welcome to Pet Realm",
-                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                        text = "Welcome to \n   Pet Realm",
+                        style = MaterialTheme.typography.headlineLarge,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -116,7 +116,7 @@ fun HomeScreen(navController: NavController) {
 
             // Footer
             Text(
-                text = "Pet Realm Sampler © 2024",
+                text = "Angelo Pet Realm © 2024 :)",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
