@@ -16,15 +16,19 @@ import ph.edu.auf.realmdiscussion.database.realmodel.OwnerModel
 import ph.edu.auf.realmdiscussion.database.realmodel.PetModel
 
 class PetViewModel : ViewModel() {
-
     private val _pets = MutableStateFlow<List<PetModel>>(emptyList())
     val pets: StateFlow<List<PetModel>> get() = _pets.asStateFlow()
 
     private val _showSnackbar = MutableSharedFlow<String>()
     val showSnackbar: SharedFlow<String> = _showSnackbar
 
+    // New state to track pet-owner relationships
+    private val _petOwners = MutableStateFlow<Map<String, OwnerModel>>(emptyMap())
+    val petOwners: StateFlow<Map<String, OwnerModel>> get() = _petOwners.asStateFlow()
+
     init {
         loadPets()
+        loadPetOwners()
     }
 
     private fun loadPets() {
@@ -36,17 +40,43 @@ class PetViewModel : ViewModel() {
         }
     }
 
+    private fun loadPetOwners() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val realm = RealmHelper.getRealmInstance()
+            val owners = realm.query(OwnerModel::class).find()
+            val petToOwnerMap = mutableMapOf<String, OwnerModel>()
+
+            owners.forEach { owner ->
+                owner.pets.forEach { pet ->
+                    petToOwnerMap[pet.id] = realm.copyFromRealm(owner)
+                }
+            }
+            _petOwners.value = petToOwnerMap
+        }
+    }
+
     fun deletePet(model: PetModel) {
         viewModelScope.launch(Dispatchers.IO) {
             val realm = RealmHelper.getRealmInstance()
             realm.write {
                 val pet = this.query<PetModel>("id == $0", model.id).first().find()
                 if (pet != null) {
+                    // Remove pet from owner before deletion
+                    val owner = this.query<OwnerModel>("pets.id == $0", model.id).first().find()
+                    owner?.pets?.remove(pet)
                     delete(pet)
+
                     _pets.update {
                         val list = it.toMutableList()
                         list.remove(model)
                         list
+                    }
+
+                    // Update pet-owner mapping
+                    _petOwners.update { currentMap ->
+                        currentMap.toMutableMap().apply {
+                            remove(model.id)
+                        }
                     }
                 }
             }
@@ -58,18 +88,25 @@ class PetViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val realm = RealmHelper.getRealmInstance()
             realm.write {
-                // Generate a unique ID for the new pet if it is not set
                 if (pet.id.isEmpty()) {
                     pet.id = java.util.UUID.randomUUID().toString()
                 }
                 val newPet = copyToRealm(pet)
                 val unmanagedPet = realm.copyFromRealm(newPet)
-                _pets.update { it + unmanagedPet }
 
                 owner?.let {
                     val managedOwner = this.query<OwnerModel>("id == $0", it.id).first().find()
                     managedOwner?.pets?.add(newPet)
+
+                    // Update pet-owner mapping
+                    _petOwners.update { currentMap ->
+                        currentMap.toMutableMap().apply {
+                            put(pet.id, realm.copyFromRealm(managedOwner!!))
+                        }
+                    }
                 }
+
+                _pets.update { it + unmanagedPet }
             }
             _showSnackbar.emit("Added ${pet.name}")
         }
@@ -85,10 +122,6 @@ class PetViewModel : ViewModel() {
                     this.petType = pet.petType
                     this.age = pet.age
                 }
-                val unmanagedPet = realm.copyFromRealm(existingPet!!)
-                _pets.update { pets ->
-                    pets.map { if (it.id == pet.id) unmanagedPet else it }
-                }
 
                 // Remove pet from previous owner's list
                 val previousOwner = this.query<OwnerModel>("pets.id == $0", pet.id).first().find()
@@ -97,7 +130,26 @@ class PetViewModel : ViewModel() {
                 // Add pet to new owner's list
                 owner?.let {
                     val managedOwner = this.query<OwnerModel>("id == $0", it.id).first().find()
-                    managedOwner?.pets?.add(existingPet)
+                    existingPet?.let { it1 -> managedOwner?.pets?.add(it1) }
+
+                    // Update pet-owner mapping
+                    _petOwners.update { currentMap ->
+                        currentMap.toMutableMap().apply {
+                            put(pet.id, realm.copyFromRealm(managedOwner!!))
+                        }
+                    }
+                } ?: run {
+                    // If no new owner, remove from pet-owner mapping
+                    _petOwners.update { currentMap ->
+                        currentMap.toMutableMap().apply {
+                            remove(pet.id)
+                        }
+                    }
+                }
+
+                val unmanagedPet = realm.copyFromRealm(existingPet!!)
+                _pets.update { pets ->
+                    pets.map { if (it.id == pet.id) unmanagedPet else it }
                 }
             }
             _showSnackbar.emit("Updated ${pet.name}")
@@ -110,7 +162,19 @@ class PetViewModel : ViewModel() {
             realm.write {
                 val managedPet = this.query<PetModel>("id == $0", pet.id).first().find()
                 val managedOwner = this.query<OwnerModel>("id == $0", owner.id).first().find()
+
+                // Remove from previous owner if exists
+                val previousOwner = this.query<OwnerModel>("pets.id == $0", pet.id).first().find()
+                previousOwner?.pets?.remove(managedPet)
+
                 managedOwner?.pets?.add(managedPet!!)
+
+                // Update pet-owner mapping
+                _petOwners.update { currentMap ->
+                    currentMap.toMutableMap().apply {
+                        put(pet.id, realm.copyFromRealm(managedOwner!!))
+                    }
+                }
             }
             _showSnackbar.emit("Adopted ${pet.name} by ${owner.name}")
         }

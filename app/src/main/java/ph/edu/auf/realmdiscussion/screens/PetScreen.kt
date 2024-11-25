@@ -76,6 +76,7 @@ fun PetScreen(
 ) {
     val pets by petViewModel.pets.collectAsState()
     val owners by ownerViewModel.owners.collectAsState()
+    val petOwners by petViewModel.petOwners.collectAsState() // Add this line
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
@@ -181,7 +182,7 @@ fun PetScreen(
                     ) { _, petContent ->
                         ItemPet(
                             petModel = petContent,
-                            owners = owners,
+                            petOwners = petOwners, // Pass petOwners instead of owners
                             onRemove = petViewModel::deletePet,
                             onEdit = { showEditPetDialog = it },
                             onAdopt = { pet ->

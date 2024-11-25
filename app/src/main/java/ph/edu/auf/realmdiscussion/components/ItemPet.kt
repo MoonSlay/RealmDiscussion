@@ -35,12 +35,13 @@ import androidx.compose.ui.Alignment
 @Composable
 fun ItemPet(
     petModel: PetModel,
-    owners: List<OwnerModel>,
+    petOwners: Map<String, OwnerModel>, // Updated parameter
     onRemove: (PetModel) -> Unit,
     onEdit: (PetModel) -> Unit,
     onAdopt: (PetModel) -> Unit
 ) {
     val currentItem by rememberUpdatedState(petModel)
+    val owner = petOwners[petModel.id] // Get owner from mapping
 
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
@@ -61,8 +62,6 @@ fun ItemPet(
         positionalThreshold = { it * .25f }
     )
 
-    val owner = owners.find { owner -> owner.pets.any { it.id == petModel.id } }
-
     SwipeToDismissBox(
         state = dismissState,
         backgroundContent = { DismissBackground(dismissState) },
@@ -74,6 +73,7 @@ fun ItemPet(
                 elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
                 shape = RoundedCornerShape(5.dp)
             ) {
+                // Rest of your existing Card content remains the same
                 Row(modifier = Modifier.padding(16.dp)) {
                     val petType = petTypes.find { it.name == petModel.petType }
                     val imageRes = petType?.imageRes ?: R.drawable.none
