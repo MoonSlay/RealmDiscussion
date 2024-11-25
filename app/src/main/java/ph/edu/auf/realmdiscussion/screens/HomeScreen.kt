@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -19,6 +20,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,6 +30,8 @@ import androidx.navigation.NavController
 import ph.edu.auf.realmdiscussion.R
 import ph.edu.auf.realmdiscussion.navigation.AppNavRoutes
 import kotlinx.coroutines.delay
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -73,26 +77,19 @@ fun HomeScreen(navController: NavController) {
             AnimatedVisibility(
                 visible = visible,
                 enter = fadeIn() + slideInVertically(
-                    initialOffsetY = { -40 },
+                    initialOffsetY = { it },
                     animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
                 )
             ) {
                 // Header Section
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(top = 48.dp)
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Pet Realm",
-                        style = MaterialTheme.typography.displayMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Manage Your Pets & Owners",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.padding(top = 8.dp)
+                        text = "Welcome to Pet Realm",
+                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                        textAlign = TextAlign.Center
                     )
                 }
             }
@@ -106,7 +103,7 @@ fun HomeScreen(navController: NavController) {
                 NavigationCard(
                     title = "Pet List",
                     description = "Manage your pets",
-                    icon = Icons.Default.Person,
+                    icon = painterResource(id = R.drawable.ic_pet),
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     onClick = { navController.navigate(AppNavRoutes.PetList.route) }
                 )
@@ -115,7 +112,7 @@ fun HomeScreen(navController: NavController) {
                 NavigationCard(
                     title = "Owner List",
                     description = "Manage pet owners",
-                    icon = Icons.Default.Person,
+                    icon = painterResource(id = R.drawable.ic_person),
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     onClick = { navController.navigate(AppNavRoutes.OwnerList.route) }
                 )
@@ -138,7 +135,7 @@ fun HomeScreen(navController: NavController) {
 private fun NavigationCard(
     title: String,
     description: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: Painter,
     containerColor: Color,
     onClick: () -> Unit
 ) {
@@ -147,7 +144,7 @@ private fun NavigationCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -165,41 +162,36 @@ private fun NavigationCard(
                 // Icon Container
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(containerColor),
-                    contentAlignment = Alignment.Center
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(8.dp)
                 ) {
                     Icon(
-                        imageVector = icon,
+                        painter = icon,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(24.dp)
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
                 // Text Content
                 Column(
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                        .weight(1f)
+                    modifier = Modifier.padding(start = 16.dp)
                 ) {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                     Text(
                         text = description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
 
             // Arrow Icon
             Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = "Navigate",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )

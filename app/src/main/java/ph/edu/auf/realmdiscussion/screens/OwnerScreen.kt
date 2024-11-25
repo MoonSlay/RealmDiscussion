@@ -86,11 +86,30 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel(), onBack: () -> Unit
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(paddingValues)
             ) {
-                //owner title
-                Text(
-                    text = "===-- Owner List --===",
-                    style = MaterialTheme.typography.headlineSmall
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    FloatingActionButton(
+                        onClick = onBack,
+                        modifier = Modifier.padding(start = 2.dp)
+                    ) {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                    Text(
+                        text = " Owner List ",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    FloatingActionButton(
+                        onClick = { showAddOwnerDialog = true },
+                        modifier = Modifier.padding(end = 2.dp)
+                    ) {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Pet")
+                    }
+                }
                 //search field
                 TextField(
                     value = searchQuery,
@@ -122,25 +141,6 @@ fun OwnerScreen(ownerViewModel: OwnerViewModel = viewModel(), onBack: () -> Unit
                     }
                 }
             }
-        }
-        //Floating action button for adding owner
-        FloatingActionButton(
-            onClick = { showAddOwnerDialog = true },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 75.dp) // Adjusted padding
-        ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Owner")
-        }
-
-        //Floating action button for going back
-        FloatingActionButton(
-            onClick = onBack,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(start = 16.dp, bottom = 75.dp) // Adjusted padding
-        ) {
-            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
         }
     }
 }

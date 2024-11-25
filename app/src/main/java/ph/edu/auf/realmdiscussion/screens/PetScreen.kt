@@ -161,17 +161,37 @@ fun PetScreen(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(paddingValues)
             ) {
-                Text(
-                    text = "===-- Pet List --===",
-                    style = MaterialTheme.typography.headlineSmall
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    FloatingActionButton(
+                        onClick = onBack,
+                        modifier = Modifier.padding(start = 2.dp)
+                    ) {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                    Text(
+                        text = " Pet List ",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    FloatingActionButton(
+                        onClick = { showAddPetDialog = true },
+                        modifier = Modifier.padding(end = 2.dp)
+                    ) {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Pet")
+                    }
+                }
                 TextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     label = { Text("Search Pets") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(5.dp),
                     singleLine = true
                 )
                 LazyColumn {
@@ -193,22 +213,6 @@ fun PetScreen(
                 }
             }
         }
-        FloatingActionButton(
-            onClick = { showAddPetDialog = true },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 75.dp)
-        ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Pet")
-        }
-        FloatingActionButton(
-            onClick = onBack,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(start = 16.dp, bottom = 75.dp)
-        ) {
-            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-        }
     }
 }
 
@@ -220,8 +224,8 @@ fun AddPetDialog(
     owners: List<OwnerModel>,
     onAddOwner: (String) -> Unit,
     initialPet: PetModel? = null,
-    ownerViewModel: OwnerViewModel = viewModel()
-) {
+
+    ) {
     var name by remember { mutableStateOf(initialPet?.name ?: "") }
     var type by remember { mutableStateOf(initialPet?.petType ?: "") }
     var age by remember { mutableStateOf(initialPet?.age?.toString() ?: "") }
