@@ -366,10 +366,6 @@ fun AddPetDialog(
                         }
                     }
                     Spacer(modifier = Modifier.height(5.dp))
-                    Button(onClick = { showAddOwnerDialog = true }) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Owner")
-                        Text("Add New Owner")
-                    }
                 }
                 if (showError) {
                     Text(
@@ -495,11 +491,6 @@ fun AdoptPetDialog(
                             )
                         }
                     }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(onClick = { showAddOwnerDialog = true }) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add Owner")
-                    Text("Add New Owner")
                 }
             }
         },
